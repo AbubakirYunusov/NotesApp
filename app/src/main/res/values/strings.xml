@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Notes App</string>
+    <string name="text_note">Notes</string>
+    <string name="text_ti">Title</string>
+    <string name="texe_ty_so">Type something...</string>
+    <string name="text_note_titel">Note title</string>
+    <string name="text_not">Заполните все поля</string>
+    <string name="text_cancel">Cancel</string>
+    <string name="text_yes">Yes</string>
+    <string name="text_do_all">Do you want to delete all notes?</string>
+    <string name="text_delete">DELETE</string>
+</resources>
