@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import com.example.notesapp.databinding.ActivityMainBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
@@ -19,11 +20,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val adaptor: NotesAdapter by lazy {
-        NotesAdapter(onClickDeleteBtn = {
-            sharedPref.deleteNoteAtIndex(it)
-            setupViewsAndAdapter()
-        })
+        NotesAdapter(
+            onClickDeleteBtn = {
+                sharedPref.deleteNoteAtIndex(it)
+                setupViewsAndAdapter()
+            })
     }
+
+    private var notesList: List<NotesModel> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +38,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupViewsAndAdapter() {
         val listOfNotes = sharedPref.getAllNotes()
-        if (listOfNotes.isNotEmpty()){
+        if (listOfNotes.isNotEmpty()) {
+            notesList = listOfNotes
             binding.noteEmptyImg.visibility = View.GONE
             binding.recyclerView.visibility = View.VISIBLE
             adaptor.updateList(listOfNotes)
@@ -45,24 +50,44 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun filterNotes(title: String) {
+        val filterNote = notesList.filter { name ->
+            name.noteTitel.contains(title, ignoreCase = true)
+        }
+        adaptor.updateList(filterNote)
+    }
+
     private fun setupClickListener() = binding.apply {
-        addNoteBtn.setOnClickListener{
+        addNoteBtn.setOnClickListener {
             startActivity(Intent(this@MainActivity, AddNoteActivity::class.java))
         }
         deleteCard.setOnClickListener {
             showConfirmDeleteNoteDialog()
         }
+        notesSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(text: String?): Boolean {
+                text?.let {
+                    filterNotes(it)
+                }
+                return true
+            }
+
+        })
     }
 
-    private fun showConfirmDeleteNoteDialog () {
-        val alertDialog = MaterialAlertDialogBuilder ( this)
+    private fun showConfirmDeleteNoteDialog() {
+        val alertDialog = MaterialAlertDialogBuilder(this)
         alertDialog.setMessage(resources.getString(R.string.text_do_all))
-        alertDialog. setPositiveButton(resources.getString(R.string.text_yes)) {dialog, _ ->
+        alertDialog.setPositiveButton(resources.getString(R.string.text_yes)) { dialog, _ ->
             deleteAllSavedNotes()
             dialog.dismiss()
         }
-        alertDialog.setNegativeButton(resources.getString(R.string.text_cancel)) {dialog, _ ->
-            dialog. dismiss ()
+        alertDialog.setNegativeButton(resources.getString(R.string.text_cancel)) { dialog, _ ->
+            dialog.dismiss()
         }
         alertDialog.create().show()
     }
@@ -74,4 +99,3 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.visibility = View.GONE
     }
 }
-
